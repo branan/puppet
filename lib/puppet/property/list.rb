@@ -35,17 +35,38 @@ module Puppet
 
       #dearrayify was motivated because to simplify the implementation of the OrderedList property
       def dearrayify(array)
-        array.sort.join(delimiter)
+        if array.nil?
+          nil
+        else
+          array.sort.join(delimiter)
+        end
+      end
+
+      def members
+        return nil unless @should
+
+        #inclusive means we are managing everything so if it isn't in should, its gone
+        if inclusive?
+          @should
+        else
+          add_should_with_current(@should, retrieve)
+        end
       end
 
       def should
-        return nil unless @should
-
-        members = @should
-        #inclusive means we are managing everything so if it isn't in should, its gone
-        members = add_should_with_current(members, retrieve) if ! inclusive?
-
         dearrayify(members)
+      end
+
+      # Returns any values from the list that were returned by
+      # retrieve but are not set as being managed.
+      def is_but_shouldnt
+        Set.new(retrieve) - Set.new(members)
+      end
+
+      # Returns any values from the list that we are managing but that
+      # were not returned by retrieve
+      def should_but_isnt
+        Set.new(members) - Set.new(retrieve)
       end
 
       def delimiter
