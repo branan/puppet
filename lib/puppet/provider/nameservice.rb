@@ -246,7 +246,7 @@ class Puppet::Provider::NameService < Puppet::Provider
 
   # The list of all groups the user is a member of.  Different
   # user mgmt systems will need to override this method.
-  def groups
+  def fetch_groups
     groups = []
 
     # Reset our group list
@@ -267,6 +267,10 @@ class Puppet::Provider::NameService < Puppet::Provider
     Etc.endgrent
 
     groups.join(",")
+  end
+
+  def groups
+    @groups ||= fetch_groups
   end
 
   # Convert the Etc struct into a hash.
