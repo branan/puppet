@@ -1637,6 +1637,28 @@ EOT
       dependencies set with the before/require/notify/subscribe metaparameters
       and the `->`/`~>` chaining arrows; this setting only affects the relative
       ordering of _unrelated_ resources."
+    },
+    :transaction => {
+      :default => "current",
+      :desc    => <<-'EOT',
+        Selects the tranaction implementation to use for evaluating catalogs.
+        Available choices are `current` (the default) and `future`
+
+        The `native` transaction means that the released version of the
+        transaction should be used.
+
+        The `native` transaction is a "time travel to the future" allowing early
+        exposure to new transaction optimizations, at the risk of bugs or
+        other changes in behavior.
+
+        The `native` transaction implementation is provided as a separate library.
+      EOT
+      :hook    => proc do |value|
+        raise ArgumentError, "#{value} is not a valid transaction option" unless ["current","native"].include? value
+        if value == "native"
+          raise ArgumentError, 'native transaction library is not installed.' unless Puppet.features.ctransaction?
+        end
+      end
     }
   )
 

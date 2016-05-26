@@ -562,10 +562,15 @@ class Puppet::Resource::Catalog < Puppet::Graph::SimpleGraph
   end
 
   def create_transaction(options)
-    transaction = Puppet::Transaction.new(self, options[:report], prioritizer)
+    if Puppet[:transaction] == "native"
+      transaction = PuppetTransaction::Transaction.new(self, options[:report], prioritizer)
+    else
+      transaction = Puppet::Transaction.new(self, options[:report], prioritizer)
+    end
+
     transaction.tags = options[:tags] if options[:tags]
     transaction.ignoreschedules = true if options[:ignoreschedules]
-    transaction.for_network_device = options[:network_device]
+    transaction.for_network_device = options[:network_device] if options[:networkdevice]
 
     transaction
   end
